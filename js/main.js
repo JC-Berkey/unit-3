@@ -1,6 +1,24 @@
 //execute script when window is loaded
 window.onload = function(){
 
+    //set up choropleth map
+    function setMap(){
+    //use Promise.all to parallelize asynchronous data loading
+    var promises = [d3.csv("data/Demographics.csv"),                    
+                    d3.json("data/States.topojson"),                                       
+                    ];    
+    Promise.all(promises).then(callback);
+
+    function callback(data){    
+        csvData = data[0];    
+        states = data[1];    
+        console.log(csvData);
+        console.log(states);  
+        
+        var unitedStates = topojson.feature(states, states.objects.States);
+    };
+};
+
     //SVG dimension variables
     var w = 900, h = 500;
 
@@ -98,40 +116,33 @@ window.onload = function(){
         })
         .style("stroke", "#000"); //black circle stroke
 
-        var yAxis = d3.axisLeft(y);
+    var yAxis = d3.axisLeft(y);
 
-        //create axis g element and add axis
-        var axis = container.append("g")
-            .attr("class", "axis")
-            .attr("transform", "translate(50, 0)")
-            .call(yAxis);
-        
-        var title = container.append("text")
-            .attr("class", "title")
-            .attr("text-anchor", "middle")
-            .attr("x", 450)
-            .attr("y", 30)
-            .text("City Populations");
+    //create axis g element and add axis
+    var axis = container.append("g")
+        .attr("class", "axis")
+        .attr("transform", "translate(50, 0)")
+        .call(yAxis);
+    
+    var title = container.append("text")
+        .attr("class", "title")
+        .attr("text-anchor", "middle")
+        .attr("x", 450)
+        .attr("y", 30)
+        .text("City Populations");
 
-        var labels = container.selectAll(".labels")
-            .data(cityPop)
-            .enter()
-            .append("text")
-            .attr("class", "labels")
-            .attr("text-anchor", "left")
-            .attr("x", function(d,i){
-                //horizontal position to the right of each circle
-                return x(i) + Math.sqrt(d.population * 0.01 / Math.PI) + 5;
-            })
-            .attr("y", function(d){
-                //vertical position centered on each circle
-                return y(d.population) + 5;
-            })
-            .text(function(d){
-                return d.city + ", Pop. " + d.population;
-            });
+    var labels = container.selectAll(".labels")
+        .data(cityPop)
+        .enter()
+        .append("text")
+        .attr("class", "labels")
+        .attr("text-anchor", "left")
+        .attr("y", function(d){
+            //vertical position centered on each circle
+            return y(d.population);
+        })
         
-            //first line of label
+    //first line of label
     var nameLine = labels.append("tspan")
         .attr("class", "nameLine")
         .attr("x", function(d,i){
