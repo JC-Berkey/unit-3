@@ -119,17 +119,10 @@ window.onload = function(){
             .append("text")
             .attr("class", "labels")
             .attr("text-anchor", "left")
-            .attr("x", function(d,i){
-                //horizontal position to the right of each circle
-                return x(i) + Math.sqrt(d.population * 0.01 / Math.PI) + 5;
-            })
             .attr("y", function(d){
                 //vertical position centered on each circle
-                return y(d.population) + 5;
+                return y(d.population);
             })
-            .text(function(d){
-                return d.city + ", Pop. " + d.population;
-            });
         
             //first line of label
     var nameLine = labels.append("tspan")

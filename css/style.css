@@ -16,3 +16,15 @@
     font-size: 1.5em;
     font-weight: bold;
 }
+
+.UnitedStates {
+    fill: #FFF;
+    stroke: #CCC;
+    stroke-width: 2px;
+}
+
+.map {
+    border: medium solid #999;
+    background-color: rgb(72, 71, 77);
+    
+}
