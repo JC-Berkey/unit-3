@@ -1,8 +1,8 @@
 (function() { 
 
     //pseudo-global variables
-    var attrArray = ["varA", "varB", "varC", "varD", "varE"]; //list of attributes
-    var expressed = attrArray[0]; //initial attribute
+    var attrArray = ["Population_Percent_Change", "Population.2014", "Age.Percent_Under_18_Years", "Age.Percent_Under_5_Years", "Age.Percent_65_and_Older"]; //list of attributes
+    var expressed = attrArray[4]; //initial attribute
     //execute script when window is loaded
     window.onload = setMap();
 
@@ -20,7 +20,7 @@
                 .attr("height", height);
         
             //create Albers equal area conic projection centered on the US
-            var projection = d3.geoAlbersUsa()   
+            var projection = d3.geoAlbers()   
                 .scale(1000)
                 .translate([380, 240]);
 
@@ -44,9 +44,9 @@
 
                 // add north american countries to map
                 var addingCountries = map.append("path")
-                .datum(northAmerica)
-                .attr("class", "North_America")
-                .attr("d", path);  
+                    .datum(northAmerica)
+                    .attr("class", "North_America")
+                    .attr("d", path);  
 
                 //join csv data to GeoJSON enumeration units
                 unitedStates = joinData(unitedStates, csvData);
@@ -55,7 +55,7 @@
                 var colorScale = makeColorScale(csvData);
 
                 //add enumeration units to the map
-                setEnumerationUnits(unitedStates, map, path);
+                setEnumerationUnits(unitedStates, map, path, colorScale);
 
                 //add coordinated visualization to the map
                 setChart(csvData, colorScale);
@@ -64,21 +64,21 @@
         function joinData(unitedStates, csvData){
             //loop through csv to assign each set of csv attribute values to geojson region
             for (var i=0; i<csvData.length; i++){
-                var csvRegion = csvData[i]; //the current region
-                var csvKey = csvRegion.State_Code; //the CSV primary key
+                var csvState = csvData[i]; //the current state
+                var csvKey = csvState.State_Name; //the CSV primary key
 
                 //loop through geojson regions to find correct region
                 for (var a=0; a<unitedStates.length; a++){
 
-                    var geojsonProps = unitedStates[a].properties; //the current region geojson properties
-                    var geojsonKey = geojsonProps.State_Code; //the geojson primary key
+                    var geojsonProps = unitedStates[a].properties; //the current state geojson properties
+                    var geojsonKey = geojsonProps.State_Name; //the geojson primary key
 
                     //where primary keys match, transfer csv data to geojson properties object
                     if (geojsonKey == csvKey){
 
                         //assign all attributes and values
                         attrArray.forEach(function(attr){
-                            var val = parseFloat(csvRegion[attr]); //get csv attribute value
+                            var val = parseFloat(csvState[attr]); //get csv attribute value
                             geojsonProps[attr] = val; //assign attribute and value to geojson properties
                         });
                     };
@@ -88,25 +88,27 @@
             return unitedStates;
         };
         
-        function setEnumerationUnits(unitedStates, map, path){                                                      // TODO Somehow make states appear (enumerated)
+        function setEnumerationUnits(unitedStates, map, path, colorScale){    
+
             //add States to map
-            var addingStates = map.selectAll(".states") // figure out how to select all of the states
-            .datum(unitedStates)
-            .enter()
-            .append("path")
-            .attr("class", function(d){
-                return "states " + d.properties.State_Code;
-            })
-            .attr("d", path)
-            .style("fill", function(d){
-                var value = d.properties[expressed];            
-                if(value) {                
-                    return colorScale(d.properties[expressed]);            
-                } else {                
-                    return "#ccc";            
-                }  
+            var addingStates = map.selectAll(".states") 
+                .data(unitedStates)
+                .enter()
+                .append("path")
+                .attr("class", function(d){
+                    return "states " + d.properties.State_Name;
+                })
+                .attr("d", path)
+                .style("fill", function(d){            
+                    var value = d.properties[expressed];            
+                    if(value) {                
+                        return colorScale(d.properties[expressed]);            
+                    } else {               
+                        return "#ccc";        
+                    }    
             });
         };
+        
         //Example 1.4 line 11...function to create color scale generator
         function makeColorScale(data){
             var colorClasses = [
@@ -171,7 +173,7 @@
                     return b[expressed]-a[expressed]
                 })
                 .attr("class", function(d){
-                    return "bar " + d.State_Code;
+                    return "bar " + d.State_Name;
                 })
                 .attr("width", chartInnerWidth / csvData.length - 1)
                 .attr("x", function(d, i){
@@ -191,7 +193,7 @@
                 .attr("x", 30)
                 .attr("y", 40)
                 .attr("class", "chartTitle")
-                .text("Number of Variable " + expressed[3] + " in each state");
+                .text(expressed + " in each state (2020)");
             
             //create vertical axis generator
             var yAxis = d3.axisLeft()

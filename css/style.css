@@ -18,22 +18,16 @@
 }
 
 .North_America {
-    fill: #FFF;
+    fill: #bbb4b4;
     stroke: #CCC;
     stroke-width: 2px;
 }
 
-.States {
-    fill: #686161;
-    stroke: #434040;
-    stroke-width: 2px;
-}
-
-/* .states {
+.states { 
     stroke: #000;
     stroke-width: 0.5px;
     stroke-linecap: round;
-} */
+}
 
 .map {
     border: medium solid #999;
